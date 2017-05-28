@@ -9,3 +9,5 @@ application.macosx
 .cproject
 Release
 .settings
+.libraries
+.ino.cpp
