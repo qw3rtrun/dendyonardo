@@ -1,28 +1,52 @@
 #ifndef NESCONTROLLER_h
 #define NESCONTROLLER_h
 
-struct ControllerState{
-	int xAxis = 0;
-	int yAxis = 0;
-	bool up = false;
-	bool down = false;
-	bool left = false;
-	bool right = false;
-	bool start = false;
-	bool select = false;
-	bool a = false;
-	bool b = false;
-} ;
+#define A 0x80
+#define B 0x40
+#define SELECT 0x20
+#define START 0x10
+#define UP 0x04
+#define DOWN 0x08
+#define LEFT 0x02
+#define RIGHT 0x01
+
+class NESController {
+	public:
+		NESController(int dataPin);
+		bool isConnected();
+		bool checkChanges();
+		int xAxis();
+		int yAxis();
+		bool up();
+		bool down();
+		bool left();
+		bool right();
+		bool start();
+		bool select();
+		bool a();
+		bool b();
+	protected:
+		void read(int i);
+	private:
+		bool button(int mask);
+		int _dataPin;
+		byte _state;
+		byte _previousState;
+};
 
 class NESDriver {
 	public:
-		NESDriver(int latchPin, int clockPin);
+		NESDriver(int latchPin, int clockPin, int dataPin);
+		NESDriver(int latchPin, int clockPin, int dataPin1, int datePin2);
 		void begin();
-		ControllerState read(int dataPin);
-		void update(int dataPins[], ControllerState states[]);
+		void readControllers();
+		NESController controller1();
+		NESController controller2();
 	private:
 		int _latchPin;
 		int _clockPin;
+		int _count;
+		NESController _cs[];
 };
 
 #endif

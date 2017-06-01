@@ -45,7 +45,7 @@ const int DATA1_PIN = 5;
 const int LATCH_PIN = 3;
 const int CLOCK_PIN = 4;
 
-const int TICK = 2;
+const int TICK = 16;
 
 const int A = 0x80;
 const int B = 0x40;
@@ -107,23 +107,7 @@ void loop() {
       lastState1 = state1;
     }
 
-    delay(TICK / 2);
-}
-
-int shiftRead() {
-  byte data0 = 0;
-  byte data1 = 0;
-  for (int i = 0; i < 8; i++) { 
-    digitalWrite(CLOCK_PIN, LOW);
-    delay(TICK / 2);
-    byte dataBit0 = digitalRead(DATA0_PIN);
-    byte dataBit1 = digitalRead(DATA1_PIN);
-    data0 = (data0 << 1) | dataBit0;
-    data1 = (data1 << 1) | dataBit1;
-    digitalWrite(CLOCK_PIN, HIGH);
-    delay(TICK / 2);
-  }
-  return (data1 << 8) | data0; 
+    delay(TICK);
 }
 
 void updateJoystickState(Joystick_ Joystick, byte state) {
@@ -134,14 +118,6 @@ void updateJoystickState(Joystick_ Joystick, byte state) {
   Joystick.setButton(2, getButton(state, SELECT));
   Joystick.setButton(3, getButton(state, START));
   Joystick.sendState();
-}
-
-int getButton(int data, int button) {
-  return (data & button) == 0;
-}
-
-int getAxis(int data, int positive, int negative) {
-  return getButton(data, positive) - getButton(data, negative); 
 }
 
 
