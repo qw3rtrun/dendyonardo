@@ -1,3 +1,5 @@
+#include "Arduino.h"
+
 #ifndef NESCONTROLLER_h
 #define NESCONTROLLER_h
 
@@ -5,14 +7,15 @@
 #define B 0x40
 #define SELECT 0x20
 #define START 0x10
-#define UP 0x04
-#define DOWN 0x08
+#define UP 0x08
+#define DOWN 0x04
 #define LEFT 0x02
 #define RIGHT 0x01
 
 class NESController {
 	public:
-		NESController(int dataPin);
+		NESController();
+		void begin(int dataPin);
 		bool isConnected();
 		bool checkChanges();
 		int xAxis();
@@ -25,8 +28,8 @@ class NESController {
 		bool select();
 		bool a();
 		bool b();
-	protected:
 		void read(int i);
+		int state();
 	private:
 		bool button(int mask);
 		int _dataPin;
@@ -46,7 +49,10 @@ class NESDriver {
 		int _latchPin;
 		int _clockPin;
 		int _count;
-		NESController _cs[];
+		NESController c1;
+		NESController c2;
+		NESController c3;
+		NESController c4;
 };
 
 #endif

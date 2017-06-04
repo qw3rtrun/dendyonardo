@@ -25,6 +25,7 @@
  */
 #include "Arduino.h"
 #include <Joystick.h>
+#include "NESController.h"
 
 Joystick_ Joystick[2] = { Joystick_(3, JOYSTICK_TYPE_GAMEPAD, 4, 0, // Button Count, Hat Switch Count
 		true, true, false,     // X and Y, but no Z Axis
@@ -36,9 +37,9 @@ Joystick_ Joystick[2] = { Joystick_(3, JOYSTICK_TYPE_GAMEPAD, 4, 0, // Button Co
 		false, false,          // No rudder or throttle
 		false, false, false) };
 
-const int DATA0_PIN = 2;
-const int DATA1_PIN = 5;
-const int LATCH_PIN = 3;
+const int DATA0_PIN = 8;
+const int DATA1_PIN = 9;
+const int LATCH_PIN = 7;
 const int CLOCK_PIN = 4;
 
 NESDriver driver = NESDriver(LATCH_PIN, CLOCK_PIN, DATA0_PIN, DATA1_PIN);
@@ -46,13 +47,12 @@ NESDriver driver = NESDriver(LATCH_PIN, CLOCK_PIN, DATA0_PIN, DATA1_PIN);
 NESController nes1 = driver.controller1();
 NESController nes2 = driver.controller2();
 
-const int TICK = 16;
+const int TICK = 1600;
 
 void setup() {
 
-	pinMode(LED_BUILTIN, OUTPUT);
-	digitalWrite(LED_BUILTIN, LOW);
-
+	Serial.begin(9600);
+ 
 	driver.begin();
 
 	Joystick[0].begin(false);
@@ -68,13 +68,27 @@ void loop() {
 
 	driver.readControllers();
 
-	digitalWrite(LED_BUILTIN,
-			updateJoystickState(Joystick[0], nes1) || updateJoystickState(Joystick[1], nes1));
+  updateJoystickState(Joystick[0], nes1);
+	updateJoystickState(Joystick[1], nes2);
 
 	delay(TICK);
 }
 
-int updateJoystickState(Joystick_ Joystick, NESController nes) {
+String nesToStr(NESController c) {
+  String r = "";
+  r += (c.a() ? "A " : "a ");
+  r += (c.b() ? "B " : "b ");
+  r += (c.select() ? "SELECT " : "select ");
+  r += (c.start() ? "START " : "start ");
+  r += (c.up() ? "UP " : "");
+  r += (c.down() ? "DOWN " : "");
+  r += (c.left() ? "LEFT " : "");
+  r += (c.right() ? "RIGHT " : "");
+  return r;
+}
+
+bool updateJoystickState(Joystick_ Joystick, NESController nes) {
+  Serial.println(nesToStr(nes));
 	if (nes.checkChanges()) {
 		Joystick.setXAxis(nes.xAxis());
 		Joystick.setYAxis(nes.yAxis());
@@ -83,5 +97,8 @@ int updateJoystickState(Joystick_ Joystick, NESController nes) {
 		Joystick.setButton(2, nes.select());
 		Joystick.setButton(3, nes.start());
 		Joystick.sendState();
+    Serial.println("sended");
+		return true;
 	}
+	return false;
 }

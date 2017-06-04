@@ -12,58 +12,88 @@ NESDriver::NESDriver(int latchPin, int clockPin, int dataPin) {
 	_latchPin = latchPin;
 	_clockPin = clockPin;
 	_count = 1;
-	_cs = {new NESController(dataPin)};
+	c1.begin(dataPin);
 }
 
 NESDriver::NESDriver(int latchPin, int clockPin, int dataPin1, int dataPin2) {
 	_latchPin = latchPin;
 	_clockPin = clockPin;
 	_count = 2;
-	_cs = {new NESController(dataPin1), new NESController(dataPin2)};
+	c1.begin(dataPin1);
+	c2.begin(dataPin2);
 }
 
 void NESDriver::begin() {
 	pinMode(_latchPin, OUTPUT);
-	digitalWrite(_latchPin, LOW);
+	digitalWrite(_latchPin, HIGH);
 	pinMode(_clockPin, OUTPUT);
-	digitalWrite(_clockPin, LOW);
+	digitalWrite(_clockPin, HIGH);
 	readControllers();
 }
 
-void NESDriver::readControllers() {
-	digitalWrite(_latchPin, HIGH);
-	delayMicroseconds(6);
-	digitalWrite(_latchPin, LOW);
-	for (int i = 0; i < 8; i++) {
-		for (int c = 0; c <= _count; c++) {
-			_cs[c].read(i);
-		}
-		digitalWrite(_clockPin, HIGH);
-		digitalWrite(_clockPin, LOW);
-	}
+
+String toStr(NESController c) {
+  String r = "";
+  r += (c.a() ? "A " : "a ");
+  r += (c.b() ? "B " : "b ");
+  r += (c.select() ? "SELECT " : "select ");
+  r += (c.start() ? "START " : "start ");
+  r += (c.up() ? "UP " : "");
+  r += (c.down() ? "DOWN " : "");
+  r += (c.left() ? "LEFT " : "");
+  r += (c.right() ? "RIGHT " : "");
+  return r;
 }
 
+void NESDriver::readControllers() {
+	c1.checkChanges();
+	digitalWrite(_latchPin, LOW);
+  delayMicroseconds(6);
+	for (int i = 0; i < 8; i++) {
+		digitalWrite(_clockPin, LOW);
+		delayMicroseconds(3);
+		c1.read(i);
+	//	c2.read(i);
+	//	c3.read(i);
+		//c4.read(i);
+		digitalWrite(_clockPin, HIGH);
+    delayMicroseconds(3);
+	}
+	digitalWrite(_latchPin, HIGH);
+ Serial.print(c1.state() );
+ Serial.print(" "+toStr(c1));
+ Serial.println("");
+}
+
+
 NESController NESDriver::controller1() {
-	return _cs[0];
+	return c1;
 }
 
 NESController NESDriver::controller2() {
-	return _cs[_count > 1 ? 1 : 0];
+	return c2;
 }
 
-NESController::NESController(int dataPin) {
-	_dataPin = dataPin;
+NESController::NESController() {
+	_dataPin = -1;
 	_state = 0;
 	_previousState = 0;
 }
 
+void NESController::begin(int dataPin) {
+  pinMode(dataPin, INPUT);
+	_dataPin = dataPin;
+}
+
 bool NESController::isConnected() {
-	return _state != 0;
+	return _dataPin >= 0 &&_state != 0;
 }
 
 void NESController::read(int i) {
-	int bit = digitalRead(_dataPin);
-	_state = (_state << (7-i)) | bit;
+	if (_dataPin > 0) {
+		int bit = digitalRead(_dataPin);
+		_state = (_state << 1) | bit;
+	}
 }
 
 bool NESController::checkChanges() {
@@ -72,8 +102,12 @@ bool NESController::checkChanges() {
 	return result;
 }
 
+int NESController::state() {
+	return _state;
+}
+
 bool NESController::button(int mask) {
-	return isConnected && (_state & mask);
+	return isConnected() && !(_state & mask);
 }
 
 bool NESController::a() {
