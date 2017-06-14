@@ -43,8 +43,8 @@ class NESDriver {
 		NESDriver(int latchPin, int clockPin, int dataPin1, int datePin2);
 		void begin();
 		void readControllers();
-		NESController controller1();
-		NESController controller2();
+		NESController* controller1();
+		NESController* controller2();
 	private:
 		int _latchPin;
 		int _clockPin;

@@ -27,11 +27,11 @@
 #include <Joystick.h>
 #include "NESController.h"
 
-Joystick_ Joystick[2] = { Joystick_(3, JOYSTICK_TYPE_GAMEPAD, 4, 0, // Button Count, Hat Switch Count
+Joystick_ Joystick[2] = { Joystick_(3, JOYSTICK_TYPE_GAMEPAD, 6, 0, // Button Count, Hat Switch Count
 		true, true, false,     // X and Y, but no Z Axis
 		false, false, false,   // No Rx, Ry, or Rz
 		false, false,          // No rudder or throttle
-		false, false, false), Joystick_(4, JOYSTICK_TYPE_GAMEPAD, 4, 0, // Button Count, Hat Switch Count
+		false, false, false), Joystick_(4, JOYSTICK_TYPE_GAMEPAD, 6, 0, // Button Count, Hat Switch Count
 		true, true, false,     // X and Y, but no Z Axis
 		false, false, false,   // No Rx, Ry, or Rz
 		false, false,          // No rudder or throttle
@@ -44,15 +44,22 @@ const int CLOCK_PIN = 4;
 
 NESDriver driver = NESDriver(LATCH_PIN, CLOCK_PIN, DATA0_PIN, DATA1_PIN);
 
-NESController nes1 = driver.controller1();
-NESController nes2 = driver.controller2();
+NESController* nes1 = driver.controller1();
+NESController* nes2 = driver.controller2();
 
-const int TICK = 1600;
+const int TICK = 16;
+
+const int BTN_L1 = 10;
+const int BTN_R1 = 16;
+const int BTN_L2 = 14;
+const int BTN_R2 = 15;
 
 void setup() {
+	pinMode(BTN_L1, INPUT_PULLUP);
+	pinMode(BTN_R1, INPUT_PULLUP);
+	pinMode(BTN_L2, INPUT_PULLUP);
+	pinMode(BTN_R2, INPUT_PULLUP);
 
-	Serial.begin(9600);
- 
 	driver.begin();
 
 	Joystick[0].begin(false);
@@ -65,30 +72,17 @@ void setup() {
 }
 
 void loop() {
-
 	driver.readControllers();
-
-  updateJoystickState(Joystick[0], nes1);
-	updateJoystickState(Joystick[1], nes2);
-
+	int l1 = digitalRead(BTN_L1);
+	int r1 = digitalRead(BTN_R1);
+	int l2 = digitalRead(BTN_L2);
+	int r2 = digitalRead(BTN_R2);
+	updateJoystickState(Joystick[0], *nes1, l1==LOW, r1==LOW);
+	updateJoystickState(Joystick[1], *nes2, l2==LOW, r2==LOW);
 	delay(TICK);
 }
 
-String nesToStr(NESController c) {
-  String r = "";
-  r += (c.a() ? "A " : "a ");
-  r += (c.b() ? "B " : "b ");
-  r += (c.select() ? "SELECT " : "select ");
-  r += (c.start() ? "START " : "start ");
-  r += (c.up() ? "UP " : "");
-  r += (c.down() ? "DOWN " : "");
-  r += (c.left() ? "LEFT " : "");
-  r += (c.right() ? "RIGHT " : "");
-  return r;
-}
-
-bool updateJoystickState(Joystick_ Joystick, NESController nes) {
-  Serial.println(nesToStr(nes));
+bool updateJoystickState(Joystick_ Joystick, NESController nes, bool l, bool r) {
 	if (nes.checkChanges()) {
 		Joystick.setXAxis(nes.xAxis());
 		Joystick.setYAxis(nes.yAxis());
@@ -96,8 +90,9 @@ bool updateJoystickState(Joystick_ Joystick, NESController nes) {
 		Joystick.setButton(1, nes.b());
 		Joystick.setButton(2, nes.select());
 		Joystick.setButton(3, nes.start());
+		Joystick.setButton(4, l);
+		Joystick.setButton(5, r);
 		Joystick.sendState();
-    Serial.println("sended");
 		return true;
 	}
 	return false;

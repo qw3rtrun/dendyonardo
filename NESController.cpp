@@ -31,47 +31,29 @@ void NESDriver::begin() {
 	readControllers();
 }
 
-
-String toStr(NESController c) {
-  String r = "";
-  r += (c.a() ? "A " : "a ");
-  r += (c.b() ? "B " : "b ");
-  r += (c.select() ? "SELECT " : "select ");
-  r += (c.start() ? "START " : "start ");
-  r += (c.up() ? "UP " : "");
-  r += (c.down() ? "DOWN " : "");
-  r += (c.left() ? "LEFT " : "");
-  r += (c.right() ? "RIGHT " : "");
-  return r;
-}
-
 void NESDriver::readControllers() {
 	c1.checkChanges();
+  c2.checkChanges();
 	digitalWrite(_latchPin, LOW);
-  delayMicroseconds(6);
+  delayMicroseconds(90);
 	for (int i = 0; i < 8; i++) {
 		digitalWrite(_clockPin, LOW);
-		delayMicroseconds(3);
 		c1.read(i);
-	//	c2.read(i);
+	  c2.read(i);
 	//	c3.read(i);
 		//c4.read(i);
 		digitalWrite(_clockPin, HIGH);
-    delayMicroseconds(3);
 	}
 	digitalWrite(_latchPin, HIGH);
- Serial.print(c1.state() );
- Serial.print(" "+toStr(c1));
- Serial.println("");
 }
 
 
-NESController NESDriver::controller1() {
-	return c1;
+NESController* NESDriver::controller1() {
+	return &c1;
 }
 
-NESController NESDriver::controller2() {
-	return c2;
+NESController* NESDriver::controller2() {
+	return &c2;
 }
 
 NESController::NESController() {
