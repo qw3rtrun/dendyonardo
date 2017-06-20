@@ -8,6 +8,8 @@ application.macosx
 .project
 .cproject
 Release
+core
+libraries
 .settings
 .libraries
 .ino.cpp
