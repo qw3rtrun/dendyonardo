@@ -6,6 +6,15 @@ NESAdapter::NESAdapter(int joyId) {
 			false, false, false,   // No Rx, Ry, or Rz
 			false, false,          // No rudder or throttle
 			false, false, false);
+	a = false;
+	b = false;
+	start = false;
+	select = false;
+	x = 0;
+	y = 0;
+	l = false;
+	r = false;
+	changed = false;
 }
 
 void NESAdapter::begin() {

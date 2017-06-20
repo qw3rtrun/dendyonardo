@@ -2,7 +2,6 @@
 #define NESJOYADAPTER_h
 
 #include <Joystick.h>
-#include "test.h"
 
 class NESAdapter {
 private:
