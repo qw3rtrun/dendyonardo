@@ -6,7 +6,7 @@
 class NESAdapter {
 private:
 	Joystick_ joy;
-	bool changed = false;
+	bool changed;
 	int x, y;
 	bool a, b, start, select, l, r;
 public:

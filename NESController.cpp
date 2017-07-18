@@ -32,14 +32,12 @@ void NESDriver::begin() {
 }
 
 void NESDriver::readControllers() {
-	c1.checkChanges();
-  c2.checkChanges();
 	digitalWrite(_latchPin, LOW);
-  delayMicroseconds(90);
+	delayMicroseconds(90);
 	for (int i = 0; i < 8; i++) {
 		digitalWrite(_clockPin, LOW);
 		c1.read(i);
-	  c2.read(i);
+		c2.read(i);
 	//	c3.read(i);
 		//c4.read(i);
 		digitalWrite(_clockPin, HIGH);
@@ -59,11 +57,10 @@ NESController* NESDriver::controller2() {
 NESController::NESController() {
 	_dataPin = -1;
 	_state = 0;
-	_previousState = 0;
 }
 
 void NESController::begin(int dataPin) {
-  pinMode(dataPin, INPUT);
+  pinMode(dataPin, INPUT_PULLUP);
 	_dataPin = dataPin;
 }
 
@@ -76,12 +73,6 @@ void NESController::read(int i) {
 		int bit = digitalRead(_dataPin);
 		_state = (_state << 1) | bit;
 	}
-}
-
-bool NESController::checkChanges() {
-	bool result = _state != _previousState;
-	_previousState = _state;
-	return result;
 }
 
 int NESController::state() {

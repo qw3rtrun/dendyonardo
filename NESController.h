@@ -34,7 +34,6 @@ class NESController {
 		bool button(int mask);
 		int _dataPin;
 		byte _state;
-		byte _previousState;
 };
 
 class NESDriver {

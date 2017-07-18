@@ -71,29 +71,29 @@ void loop() {
 	int l2 = digitalRead(BTN_L2);
 	int r2 = digitalRead(BTN_R2);
 	digitalWrite(LED_1,
-			updateJoystickState(joy1, *nes1, l1 == LOW, r1 == LOW));
-	digitalWrite(LED_2,
-			updateJoystickState(joy2, *nes2, l2 == LOW, r2 == LOW));
+			updateJoystickState(&joy1, *nes1, l1 == LOW, r1 == LOW));
+//	digitalWrite(LED_2,
+	//		updateJoystickState(joy2, *nes2, l2 == LOW, r2 == LOW));
 	delay(TICK);
 }
 
-bool updateJoystickState(NESAdapter joy, NESController nes, bool l, bool r) {
-	if (nes.isConnected()) {
-		joy.setX(nes.xAxis());
-		joy.setY(nes.yAxis());
-		joy.setA(nes.a());
-		joy.setB(nes.b());
-		joy.setSelect(nes.select());
-		joy.setStart(nes.start());
-		joy.setL(l);
-		joy.setR(r);
-		joy.sendState();
+bool updateJoystickState(NESAdapter* joy, NESController nes, bool l, bool r) {
+	//if (nes.isConnected()) {
+		//joy.setX(nes.xAxis());
+	//	joy.setY(nes.yAxis());
+			joy->setA(nes.a());
+		//.setB(nes.b());
+		//joy.setSelect(nes.select());
+		//joy.setStart(nes.start());
+		//joy.setL(l);
+		//joy.setR(r);
+		joy->sendState();
 		return true;
-	} else {
-		joy.reset();
-		joy.sendState();
-		return false;
-	}
+	//} else {
+	//	joy.reset();
+		//joy.sendState();
+		//return false;
+	//}
 
 }
 
